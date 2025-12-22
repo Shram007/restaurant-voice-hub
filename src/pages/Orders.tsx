@@ -13,7 +13,7 @@ import {
   Filter,
 } from "lucide-react";
 
-type FilterType = "today" | "week" | "month" | "custom";
+type FilterType = "today" | "week" | "month" | "year" | "custom";
 
 const Orders = () => {
   const [filter, setFilter] = useState<FilterType>("today");
@@ -49,6 +49,13 @@ const Orders = () => {
             value={`$${dashboardStats.avgOrderValue.toFixed(2)}`}
             icon={<TrendingUp className="w-5 h-5" />}
           />
+          <StatCard
+            title="Platform Commission"
+            value={`$${(dashboardStats.revenue * 0.1).toFixed(2)}`}
+            subtitle="10% (Est.)"
+            icon={<DollarSign className="w-5 h-5" />}
+            variant="warning"
+          />
         </div>
 
         {/* Filters */}
@@ -63,14 +70,14 @@ const Orders = () => {
             />
           </div>
           <div className="flex gap-2">
-            {(["today", "week", "month"] as FilterType[]).map((f) => (
+            {(["today", "week", "month", "year"] as FilterType[]).map((f) => (
               <Button
                 key={f}
                 variant={filter === f ? "default" : "outline"}
                 size="sm"
                 onClick={() => setFilter(f)}
               >
-                {f === "today" ? "Today" : f === "week" ? "This Week" : "This Month"}
+                {f === "today" ? "Today" : f === "week" ? "This Week" : f === "month" ? "This Month" : "This Year"}
               </Button>
             ))}
             <Button variant="outline" size="sm">
@@ -142,18 +149,17 @@ const Orders = () => {
                     </td>
                     <td className="px-5 py-4 text-center">
                       <span
-                        className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${
-                          order.status === "confirmed"
+                        className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${order.status === "confirmed"
                             ? "bg-primary/10 text-primary"
                             : order.status === "in_progress"
-                            ? "bg-warning/10 text-warning"
-                            : "bg-success/10 text-success"
-                        }`}
+                              ? "bg-warning/10 text-warning"
+                              : "bg-success/10 text-success"
+                          }`}
                       >
                         {order.status === "in_progress"
                           ? "In Progress"
                           : order.status.charAt(0).toUpperCase() +
-                            order.status.slice(1)}
+                          order.status.slice(1)}
                       </span>
                     </td>
                     <td className="px-5 py-4 text-right">

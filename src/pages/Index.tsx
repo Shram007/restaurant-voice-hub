@@ -14,9 +14,12 @@ import {
   Mic,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useVoiceAgent } from "@/hooks/use-voice-agent";
 
 const Index = () => {
   const recentOrders = mockOrders.slice(0, 3);
+  const { status, isSpeaking, startConversation, stopConversation } = useVoiceAgent();
+  const isConnected = status === "connected";
 
   return (
     <DashboardLayout
@@ -43,6 +46,23 @@ const Index = () => {
               </div>
             </div>
             <div className="flex flex-wrap gap-3">
+              <Button
+                variant={isConnected ? "destructive" : "default"}
+                onClick={isConnected ? stopConversation : startConversation}
+                className="min-w-[140px]"
+              >
+                {isConnected ? (
+                  <>
+                    <Mic className="w-4 h-4 mr-2 animate-pulse" />
+                    User Connected
+                  </>
+                ) : (
+                  <>
+                    <Phone className="w-4 h-4 mr-2" />
+                    Connect Agent
+                  </>
+                )}
+              </Button>
               <Button variant="outline" asChild>
                 <Link to="/setup">
                   <LinkIcon className="w-4 h-4" />
@@ -133,18 +153,17 @@ const Index = () => {
                     <p className="text-xs text-muted-foreground">{order.eta}</p>
                   </div>
                   <span
-                    className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                      order.status === "confirmed"
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium ${order.status === "confirmed"
                         ? "bg-primary/10 text-primary"
                         : order.status === "in_progress"
-                        ? "bg-warning/10 text-warning"
-                        : "bg-success/10 text-success"
-                    }`}
+                          ? "bg-warning/10 text-warning"
+                          : "bg-success/10 text-success"
+                      }`}
                   >
                     {order.status === "in_progress"
                       ? "In Progress"
                       : order.status.charAt(0).toUpperCase() +
-                        order.status.slice(1)}
+                      order.status.slice(1)}
                   </span>
                 </div>
               </div>

@@ -54,8 +54,8 @@ const Setup = () => {
                     currentStep > step.number
                       ? "bg-success text-success-foreground"
                       : currentStep === step.number
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
                   )}
                 >
                   {currentStep > step.number ? (
@@ -121,8 +121,26 @@ const Setup = () => {
                       {selectedPOS === provider.id ? "Connected" : "Click to connect"}
                     </p>
                   </button>
+
                 ))}
               </div>
+
+              {selectedPOS && (
+                <div className="bg-muted p-4 rounded-xl animate-fade-in space-y-3">
+                  <Label>
+                    Enter your {posProviders.find(p => p.id === selectedPOS)?.name} API Key
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input type="password" placeholder="sk_test_..." className="font-mono bg-background" />
+                    <Button onClick={() => toast({ title: "Connected", description: `Successfully connected to ${posProviders.find(p => p.id === selectedPOS)?.name}` })}>
+                      Connect
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    This allows us to sync menu items and push orders directly to your POS.
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
@@ -133,10 +151,10 @@ const Setup = () => {
                   <Upload className="w-7 h-7 text-primary" />
                 </div>
                 <h2 className="text-xl font-semibold text-foreground">
-                  Upload Menu & FAQs
+                  Upload Menu, Ingredients & FAQs
                 </h2>
                 <p className="text-muted-foreground">
-                  Help your AI understand what to offer customers.
+                  Help your AI understand your full menu including ingredients for allergy checks.
                 </p>
               </div>
 
@@ -158,7 +176,7 @@ const Setup = () => {
                   Preview
                 </p>
                 <div className="text-sm text-muted-foreground">
-                  No file uploaded yet. Upload a CSV with columns: name, category, price, description.
+                  No file uploaded yet. Upload a CSV with columns: name, category, price, description, ingredients.
                 </div>
               </div>
             </div>
@@ -251,7 +269,7 @@ const Setup = () => {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </DashboardLayout >
   );
 };
 

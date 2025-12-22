@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -11,7 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Save, Mic, Clock, Shield, Volume2 } from "lucide-react";
+import { Save, Mic, Clock, Shield, Volume2, Key } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 
 const Settings = () => {
@@ -20,6 +21,18 @@ const Settings = () => {
     disclosureEnabled: true,
     fallbackTimeout: [120],
   });
+  const [agentId, setAgentId] = useState("");
+
+  useEffect(() => {
+    const savedId = localStorage.getItem("ELEVEN_LABS_AGENT_ID");
+    if (savedId) setAgentId(savedId);
+  }, []);
+
+  const handleAgentIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setAgentId(value);
+    localStorage.setItem("ELEVEN_LABS_AGENT_ID", value);
+  };
   const [businessHours, setBusinessHours] = useState({
     monday: { open: "11:00", close: "22:00", enabled: true },
     tuesday: { open: "11:00", close: "22:00", enabled: true },
@@ -69,6 +82,20 @@ const Settings = () => {
           </div>
 
           <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>ElevenLabs Conversational Agent ID</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={agentId}
+                  onChange={handleAgentIdChange}
+                  placeholder="e.g. jA9l... (Agent ID)"
+                  className="font-mono"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Found in <strong>ElevenLabs &gt; Conversational AI</strong>. This is different from a "Voice ID".
+              </p>
+            </div>
             <div className="space-y-2">
               <Label>AI Voice</Label>
               <Select
