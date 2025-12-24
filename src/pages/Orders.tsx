@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { mockOrders, dashboardStats } from "@/data/mockData";
+import { api } from "@/services/api";
 import {
   ShoppingBag,
   DollarSign,
@@ -18,10 +18,32 @@ type FilterType = "today" | "week" | "month" | "year" | "custom";
 const Orders = () => {
   const [filter, setFilter] = useState<FilterType>("today");
   const [searchQuery, setSearchQuery] = useState("");
+  const [orders, setOrders] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const filteredOrders = mockOrders.filter(
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [ordersData, statsData] = await Promise.all([
+          api.getOrders(filter),
+          api.getStats()
+        ]);
+        setOrders(ordersData);
+        setStats(statsData);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [filter]);
+
+  const filteredOrders = orders.filter(
     (order) =>
-      order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.customer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -35,23 +57,23 @@ const Orders = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <StatCard
             title="Total Orders"
-            value={dashboardStats.ordersToday}
+            value={stats?.ordersToday ?? 0}
             icon={<ShoppingBag className="w-5 h-5" />}
             variant="success"
           />
           <StatCard
             title="Revenue"
-            value={`$${dashboardStats.revenue.toLocaleString()}`}
+            value={`$${(stats?.revenue ?? 0).toLocaleString()}`}
             icon={<DollarSign className="w-5 h-5" />}
           />
           <StatCard
             title="Avg Order Value"
-            value={`$${dashboardStats.avgOrderValue.toFixed(2)}`}
+            value={`$${(stats?.avgOrderValue ?? 0).toFixed(2)}`}
             icon={<TrendingUp className="w-5 h-5" />}
           />
           <StatCard
             title="Platform Commission"
-            value={`$${(dashboardStats.revenue * 0.1).toFixed(2)}`}
+            value={`$${((stats?.revenue ?? 0) * 0.1).toFixed(2)}`}
             subtitle="10% (Est.)"
             icon={<DollarSign className="w-5 h-5" />}
             variant="warning"
@@ -117,58 +139,73 @@ const Orders = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredOrders.map((order) => (
-                  <tr
-                    key={order.id}
-                    className="hover:bg-muted/30 transition-colors"
-                  >
-                    <td className="px-5 py-4">
-                      <span className="font-mono text-sm text-foreground">
-                        {order.id}
-                      </span>
+                {loading ? (
+                  <tr>
+                    <td colSpan={7} className="text-center py-10 text-muted-foreground">
+                      Loading orders...
                     </td>
-                    <td className="px-5 py-4">
-                      <span className="font-medium text-foreground">
-                        {order.customerName}
-                      </span>
+                  </tr>
+                ) : filteredOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="text-center py-10 text-muted-foreground">
+                      No orders found.
                     </td>
-                    <td className="px-5 py-4 hidden md:table-cell">
-                      <span className="text-sm text-muted-foreground">
-                        {order.phone}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 hidden lg:table-cell">
-                      <span className="text-sm text-muted-foreground truncate max-w-xs block">
-                        {order.items}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 text-right">
-                      <span className="font-semibold text-foreground">
-                        ${order.total.toFixed(2)}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 text-center">
-                      <span
-                        className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${order.status === "confirmed"
-                            ? "bg-primary/10 text-primary"
-                            : order.status === "in_progress"
+                  </tr>
+                ) : (
+                  filteredOrders.map((order) => (
+                    <tr
+                      key={order.id}
+                      className="hover:bg-muted/30 transition-colors"
+                    >
+                      <td className="px-5 py-4">
+                        <span className="font-mono text-sm text-foreground">
+                          {order.id}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className="font-medium text-foreground">
+                          {order.customer_name}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 hidden md:table-cell">
+                        <span className="text-sm text-muted-foreground">
+                          {order.phone}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 hidden lg:table-cell">
+                        <span className="text-sm text-muted-foreground truncate max-w-xs block">
+                          {order.items}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-right">
+                        <span className="font-semibold text-foreground">
+                          ${order.total.toFixed(2)}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-center">
+                        <span
+                          className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${
+                            order.status === "confirmed"
+                              ? "bg-primary/10 text-primary"
+                              : order.status === "in_progress"
                               ? "bg-warning/10 text-warning"
                               : "bg-success/10 text-success"
                           }`}
-                      >
-                        {order.status === "in_progress"
-                          ? "In Progress"
-                          : order.status.charAt(0).toUpperCase() +
-                          order.status.slice(1)}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 text-right">
-                      <span className="text-sm text-muted-foreground">
-                        {order.eta}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                        >
+                          {order.status === "in_progress"
+                            ? "In Progress"
+                            : order.status.charAt(0).toUpperCase() +
+                              order.status.slice(1)}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-right">
+                        <span className="text-sm text-muted-foreground">
+                          {order.eta}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

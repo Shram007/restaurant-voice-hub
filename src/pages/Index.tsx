@@ -1,8 +1,9 @@
+import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { StatusIndicator } from "@/components/dashboard/StatusIndicator";
 import { Button } from "@/components/ui/button";
-import { dashboardStats, mockOrders } from "@/data/mockData";
+import { api } from "@/services/api";
 import {
   Phone,
   ShoppingBag,
@@ -17,9 +18,31 @@ import { Link } from "react-router-dom";
 import { useVoiceAgent } from "@/hooks/use-voice-agent";
 
 const Index = () => {
-  const recentOrders = mockOrders.slice(0, 3);
+  const [stats, setStats] = useState<any>(null);
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  
   const { status, isSpeaking, startConversation, stopConversation } = useVoiceAgent();
   const isConnected = status === "connected";
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [statsData, ordersData] = await Promise.all([
+          api.getStats(),
+          api.getOrders("today")
+        ]);
+        setStats(statsData);
+        setRecentOrders(ordersData.slice(0, 3));
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
     <DashboardLayout
@@ -39,8 +62,8 @@ const Index = () => {
                   AI Voice Assistant
                 </h2>
                 <StatusIndicator
-                  status={dashboardStats.aiStatus}
-                  label={dashboardStats.aiStatus === "online" ? "Online & Ready" : "Offline"}
+                  status={stats?.aiStatus ?? "online"}
+                  label={stats?.aiStatus === "online" ? "Online & Ready" : "Offline"}
                   size="sm"
                 />
               </div>
@@ -89,27 +112,27 @@ const Index = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             title="Calls Today"
-            value={dashboardStats.callsToday}
+            value={stats?.callsToday ?? 0}
             icon={<Phone className="w-5 h-5" />}
             trend={{ value: 12, isPositive: true }}
             variant="primary"
           />
           <StatCard
             title="Orders Placed"
-            value={dashboardStats.ordersToday}
+            value={stats?.ordersToday ?? 0}
             icon={<ShoppingBag className="w-5 h-5" />}
             trend={{ value: 8, isPositive: true }}
             variant="success"
           />
           <StatCard
             title="Today's Revenue"
-            value={`$${dashboardStats.revenue.toLocaleString()}`}
+            value={`$${(stats?.revenue ?? 0).toLocaleString()}`}
             icon={<DollarSign className="w-5 h-5" />}
             trend={{ value: 15, isPositive: true }}
           />
           <StatCard
             title="Conversion Rate"
-            value={`${dashboardStats.conversionRate}%`}
+            value={`${stats?.conversionRate?.toFixed(0) ?? 0}%`}
             icon={<TrendingUp className="w-5 h-5" />}
             subtitle="Calls → Orders"
           />
@@ -135,7 +158,7 @@ const Index = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3">
                     <p className="font-medium text-foreground">
-                      {order.customerName}
+                      {order.customer_name}
                     </p>
                     <span className="text-xs text-muted-foreground">
                       {order.id}

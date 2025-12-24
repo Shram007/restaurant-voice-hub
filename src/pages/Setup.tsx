@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Check, ArrowRight, ArrowLeft, Upload, Link as LinkIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { api } from "@/services/api";
 
 const posProviders = [
   { id: "square", name: "Square", logo: "⬛" },
@@ -30,11 +31,42 @@ const Setup = () => {
     { number: 3, title: "Business Rules" },
   ];
 
-  const handleComplete = () => {
-    toast({
-      title: "Setup complete!",
-      description: "Your AI voice assistant is ready to take orders.",
-    });
+  const handleComplete = async () => {
+    try {
+      await api.setupRestaurant({
+        name: "My Restaurant",
+        business_rules: JSON.stringify(settings),
+      });
+      toast({
+        title: "Setup complete!",
+        description: "Your AI voice assistant is ready to take orders.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save setup data.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      await api.uploadMenu(file);
+      toast({
+        title: "Success",
+        description: "Menu uploaded successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to upload menu",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -158,7 +190,13 @@ const Setup = () => {
                 </p>
               </div>
 
-              <div className="border-2 border-dashed border-primary/30 rounded-xl p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
+              <div className="relative border-2 border-dashed border-primary/30 rounded-xl p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
+                <Input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileUpload}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
                 <Upload className="w-10 h-10 mx-auto text-primary/50 mb-4" />
                 <p className="font-medium text-foreground">
                   Drop your menu CSV here

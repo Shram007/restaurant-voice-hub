@@ -1,20 +1,62 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { mockMenuItems, mockFaqs } from "@/data/mockData";
+import { api } from "@/services/api";
 import { Plus, Save, Trash2, Upload, Pencil } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Menu = () => {
-  const [menuItems, setMenuItems] = useState(mockMenuItems);
-  const [faqs, setFaqs] = useState(mockFaqs);
+  const [menuItems, setMenuItems] = useState<any[]>([]);
+  const [faqs, setFaqs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [menuData, faqsData] = await Promise.all([
+        api.getMenu(),
+        api.getFaqs()
+      ]);
+      setMenuItems(menuData);
+      setFaqs(faqsData);
+    } catch (error) {
+      console.error("Error fetching menu data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      await api.uploadMenu(file);
+      toast({
+        title: "Success",
+        description: "Menu uploaded successfully",
+      });
+      fetchData();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to upload menu",
+        variant: "destructive",
+      });
+    }
+  };
+
   const toggleAvailability = (id: string) => {
+    // Implement API call for availability toggle if needed
     setMenuItems((items) =>
       items.map((item) =>
         item.id === id ? { ...item, available: !item.available } : item
@@ -63,9 +105,17 @@ const Menu = () => {
                   Drag and drop or click to browse
                 </p>
               </div>
-              <Button variant="outline" size="sm">
-                Choose File
-              </Button>
+              <div className="relative">
+                <Input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileUpload}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <Button variant="outline" size="sm">
+                  Choose File
+                </Button>
+              </div>
             </div>
           </div>
 
