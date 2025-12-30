@@ -40,13 +40,16 @@ const Menu = () => {
     if (!file) return;
 
     try {
-      await api.uploadMenu(file);
+      const response = await api.uploadMenu(file);
       toast({
         title: "Success",
-        description: "Menu uploaded successfully",
+        description: response.message || "Menu uploaded successfully",
       });
+      // Clear the input value so the same file can be selected again if needed
+      event.target.value = "";
       fetchData();
     } catch (error) {
+      console.error("Upload error:", error);
       toast({
         title: "Error",
         description: "Failed to upload menu",
@@ -55,13 +58,39 @@ const Menu = () => {
     }
   };
 
-  const toggleAvailability = (id: string) => {
-    // Implement API call for availability toggle if needed
+  const toggleAvailability = async (id: string) => {
+    const item = menuItems.find(i => i.id === id);
+    if (!item) return;
+    
+    const newStatus = !item.available;
+    
+    // Optimistic update
     setMenuItems((items) =>
       items.map((item) =>
-        item.id === id ? { ...item, available: !item.available } : item
+        item.id === id ? { ...item, available: newStatus } : item
       )
     );
+
+    try {
+      await api.updateItemAvailability(id, newStatus);
+      toast({
+        title: "Success",
+        description: `Item marked as ${newStatus ? "available" : "unavailable"}`,
+      });
+    } catch (error) {
+      console.error("Error updating availability:", error);
+      // Revert on error
+      setMenuItems((items) =>
+        items.map((item) =>
+          item.id === id ? { ...item, available: !newStatus } : item
+        )
+      );
+      toast({
+        title: "Error",
+        description: "Failed to update item availability",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSave = () => {
