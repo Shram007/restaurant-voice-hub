@@ -1,73 +1,70 @@
-# Welcome to your Lovable project
+# Restaurant Voice Hub
 
-## Project info
+This is a full-stack application with a React frontend and a FastAPI (Python) backend, designed to integrate with ElevenLabs for AI voice ordering.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Prerequisites
 
-## How can I edit this code?
+1.  **Node.js**: [Download & Install](https://nodejs.org/) (for the frontend)
+2.  **Python 3.8+**: [Download & Install](https://www.python.org/) (for the backend)
+3.  **ngrok**: [Download & Install](https://ngrok.com/) (for external access/ElevenLabs)
 
-There are several ways of editing your application.
+## Setup & Startup Guide
 
-**Use Lovable**
+To run this application on any machine (including a new PC), follow these steps:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### 1. Setup Backend (Python)
 
-Changes made via Lovable will be committed automatically to this repo.
+Open a terminal/command prompt in the `restaurant-voice-hub` directory:
 
-**Use your preferred IDE**
+```bash
+# Install Python dependencies
+pip install fastapi uvicorn requests python-multipart
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+# Start the Backend Server
+python backend/main.py
+```
+*The backend will start on `http://localhost:8001`.*
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 2. Setup Frontend (React)
 
-Follow these steps:
+Open a **new** terminal in the `restaurant-voice-hub` directory:
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+```bash
+# Install Node dependencies (first time only)
+npm install
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the Frontend
 npm run dev
 ```
+*The frontend dashboard will be available at `http://localhost:8081` (or similar).*
 
-**Edit a file directly in GitHub**
+### 3. Setup External Access (ngrok)
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+To allow ElevenLabs (or other external tools) to talk to your local backend, you need a tunnel.
+Open a **third** terminal:
 
-**Use GitHub Codespaces**
+```bash
+# Start ngrok pointing to your backend port
+# Replace the domain with your specific static domain if you have one
+ngrok http --domain=overbig-harrison-unfervidly.ngrok-free.dev 8001
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Configuration
 
-## What technologies are used for this project?
+### Environment Variables (.env)
+The frontend connects to the backend using the configuration in `.env`.
+For local development (to avoid ISP blocking issues), use:
+```
+VITE_API_URL=http://localhost:8001
+```
 
-This project is built with:
+### ElevenLabs Setup
+When configuring your Agent in ElevenLabs:
+1.  Use the **ngrok URL** (e.g., `https://overbig-harrison-unfervidly.ngrok-free.dev`) for all tool definitions.
+2.  Your local dashboard will continue to work via `localhost`.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Troubleshooting
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+*   **Menu Search Failed**: Ensure the backend is running and the ngrok tunnel is active with the correct domain.
+*   **Availability Toggle Issue**: Ensure you are using the latest code where `api.ts` maps `availability` correctly.
+*   **ISP Blocking**: If `curl` to the ngrok URL fails locally, use `localhost` for local testing.
