@@ -49,6 +49,20 @@ Open a **third** terminal:
 ngrok http --domain=overbig-harrison-unfervidly.ngrok-free.dev 8001
 ```
 
+### Using ngrok on a Different PC
+
+If you move this project to another computer, you can continue using the same static domain (`overbig-harrison-unfervidly.ngrok-free.dev`), but you must follow these rules:
+
+1.  **Authenticate**: You must log in to ngrok on the new PC using the **same ngrok account** (or Auth Token) that owns the domain.
+    ```bash
+    ngrok config add-authtoken <YOUR_AUTH_TOKEN>
+    ```
+    *(You can find your token on the [ngrok Dashboard](https://dashboard.ngrok.com/get-started/your-authtoken))*
+
+2.  **Single Session**: You cannot run the tunnel on two computers at the same time with the same domain (on the free plan).
+    *   **Stop ngrok on the old PC** (Ctrl+C in the terminal).
+    *   Start it on the new PC using the command in Step 3 above.
+
 ## Configuration
 
 ### Environment Variables (.env)
