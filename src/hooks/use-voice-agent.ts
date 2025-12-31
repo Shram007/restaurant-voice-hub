@@ -19,9 +19,10 @@ export const useVoiceAgent = () => {
     }
 
     try {
+      console.log('[useVoiceAgent] Starting conversation with Agent ID:', agentId);
       await conversation.startSession({
         agentId: agentId,
-        connectionType: 'websocket', // Or 'webrtc'
+        // connectionType: 'websocket', // Optional, defaults to websocket if not specified
       });
     } catch (error) {
       console.error('Failed to start conversation:', error);
