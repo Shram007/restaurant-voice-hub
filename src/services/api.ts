@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8001"; // Force local URL for dashboard
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8001";
 
 export const api = {
   getOrders: async (range: string = "today") => {
