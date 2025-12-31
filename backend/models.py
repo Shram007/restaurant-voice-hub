@@ -1,45 +1,84 @@
-from datetime import datetime
-from typing import Optional, List
-from sqlmodel import Field, SQLModel, Relationship
+from pydantic import BaseModel
+from typing import List, Optional, Literal
 
-class RestaurantConfig(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+class ModifierOption(BaseModel):
     name: str
-    business_rules: str  # JSON string or text
+    options: List[str]
 
-class MenuItem(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+class MenuItem(BaseModel):
+    item_id: str
     name: str
     category: str
     price: float
-    available: bool = True
+    availability: bool
+    modifiers: List[ModifierOption] = []
 
-class Order(SQLModel, table=True):
-    id: Optional[str] = Field(default=None, primary_key=True)
-    customer_name: str
-    phone: str
-    items: str  # Description or JSON string
-    total: float
-    status: str
-    eta: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+class MenuResponse(BaseModel):
+    matches: List[MenuItem]
+    notes: Optional[str] = None
 
-class Call(SQLModel, table=True):
-    id: Optional[str] = Field(default=None, primary_key=True)
-    duration: str
-    outcome: str
-    transfer_reason: Optional[str] = None
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
-    phone: str
+class ModifierSelection(BaseModel):
+    modifier_name: str
+    option: str
 
-class CallEvent(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+class OrderItem(BaseModel):
+    item_id: str
+    quantity: int
+    modifier_selections: List[ModifierSelection] = []
+    special_instructions: Optional[str] = None
+
+class OrderCreateRequest(BaseModel):
+    restaurant_id: str
     call_id: str
-    event_type: str
-    message: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    order_id: Optional[str] = None
+    fulfillment: Literal["pickup", "delivery"] = "pickup"
+    customer_name: Optional[str] = None
+    phone: Optional[str] = None
+    items: List[OrderItem] = []
+    notes: Optional[str] = None
 
-class FAQ(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    question: str
-    answer: str
+class OrderResponse(BaseModel):
+    order_id: str
+    status: Literal["draft", "confirmed", "cancelled"]
+    subtotal: float
+    tax: float
+    total: float
+    missing_fields: List[str]
+    validation_errors: List[str]
+
+class EtaRequest(BaseModel):
+    restaurant_id: str
+    order_id: str
+
+class EtaResponse(BaseModel):
+    eta_minutes: int
+    ready_time_iso: Optional[str] = None
+    reason: str
+
+class OrderConfirmRequest(BaseModel):
+    restaurant_id: str
+    order_id: str
+    payment_mode: Literal["pay_at_pickup", "payment_link"] = "pay_at_pickup"
+
+class OrderConfirmResponse(BaseModel):
+    confirmed: bool
+    order_id: str
+    total: float
+    pickup_eta_minutes: int
+    payment_link: Optional[str] = None
+    pos_provider: str = "none"
+    pos_order_id: Optional[str] = None
+
+class HandoffRequest(BaseModel):
+    restaurant_id: str
+    call_id: str
+    reason: str
+    order_id: Optional[str] = None
+    summary_for_human: Optional[str] = None
+
+class HandoffResponse(BaseModel):
+    transferred: bool
+    message: str
+
+class AvailabilityUpdate(BaseModel):
+    available: bool
