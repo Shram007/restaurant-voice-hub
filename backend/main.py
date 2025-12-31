@@ -8,7 +8,7 @@ import io
 import csv
 import json
 from dateutil import parser
-from backend.database import supabase
+from database import supabase
 
 app = FastAPI()
 
