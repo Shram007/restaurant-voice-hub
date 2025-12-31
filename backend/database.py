@@ -6,7 +6,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 url: str = os.environ.get("SUPABASE_URL", "")
-key: str = os.environ.get("SUPABASE_KEY", "")
+# Prefer Service Key for backend operations to bypass RLS
+key: str = os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("SUPABASE_KEY", "")
 
 # Fallback for local dev if not set (user should set these in env)
 if not url or not key:
