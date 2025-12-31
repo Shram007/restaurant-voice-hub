@@ -22,7 +22,7 @@ export const useVoiceAgent = () => {
       console.log('[useVoiceAgent] Starting conversation with Agent ID:', agentId);
       await conversation.startSession({
         agentId: agentId,
-        // connectionType: 'websocket', // Optional, defaults to websocket if not specified
+        connectionType: 'websocket', // Optional, defaults to websocket if not specified
       });
     } catch (error) {
       console.error('Failed to start conversation:', error);
