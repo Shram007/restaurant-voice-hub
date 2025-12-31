@@ -1,0 +1,83 @@
+Restaurant Voice Hub - Demo Script
+
+This script guides you through a demonstration of the AI Voice Restaurant Agent, showcasing its ability to handle dynamic menus, take orders, and manage restaurant operations.
+
+Phase 1: Introduction & Setup (The "Before" State)
+
+Scene 1: The Dashboard
+*   Action: Start on the main "Overview" dashboard.
+*   Talking Point: "Welcome to the Restaurant Voice Hub. This is the command center where restaurant owners can manage their AI phone agent."
+*   Highlight: Point out the "AI Status: Online" indicator and the key metrics (Orders Today, Revenue).
+
+Scene 2: Current Menu Verification
+*   Action: Navigate to the "Menu & FAQs" tab.
+*   Action: Show the current active menu (likely the default one or whatever is currently loaded).
+*   Talking Point: "Here we have our current live menu. The AI agent reads directly from this database, so any changes happen instantly."
+
+---
+
+Phase 2: Dynamic Menu Update (The "Magic" Moment)
+
+Scene 3: Uploading a New Menu
+*   Action: Stay on the "Menu & FAQs" tab.
+*   Talking Point: "Let's say it's lunch time and we want to switch to our Burger menu. Instead of reprogramming the AI, we just upload a simple CSV file."
+*   Action: Click "Choose File" and select `burger_menu.csv` (from the `sample_menus` folder).
+*   Action: Watch the table update with the new items (Classic Cheeseburger, Milkshakes, etc.).
+*   Talking Point: "And just like that, the AI now knows we sell burgers. No code changes required."
+
+---
+
+Phase 3: The Live Call (The Core Demo)
+
+Scene 4: Connecting the Agent
+*   Action: Navigate back to the "Overview" dashboard.
+*   Action: Click the "Connect Agent" button.
+*   Talking Point: "Now, let's give our restaurant a call."
+
+Scene 5: The Conversation (Roleplay)
+*   Action: Speak clearly to the agent.
+*   Script:
+    *   You: "Hi, I'd like to place an order for pickup."
+    *   Agent: (Will ask what you want).
+    *   You: "What kind of burgers do you have?" (Testing menu knowledge).
+    *   Agent: (Should list the burgers from the CSV you just uploaded).
+    *   You: "I'll take the Bacon BBQ Burger and a Vanilla Milkshake."
+    *   Agent: (Will confirm price/details).
+    *   You: "Actually, can you add some Onion Rings to that?" (Testing modification).
+    *   You: "That's all. My name is [Your Name] and my number is 555-0199."
+    *   Agent: (Will finalize the order).
+
+---
+
+Phase 4: Order Verification (The Result)
+
+Scene 6: Real-time Updates
+*   Action: While still on the call (or immediately after), navigate to the "Orders" tab.
+*   Talking Point: "As we speak, the AI is structured the unstructured voice data into a standard order format."
+*   Action: Show the new order appearing at the top of the list.
+*   Highlight:
+    *   Customer Name & Phone.
+    *   The correct items (Burger, Shake, Rings).
+    *   The calculated total.
+    *   Status: "Confirmed".
+
+Scene 7: The "Handoff" (Optional Edge Case)
+*   Talking Point: "What if the customer asks something the AI can't handle?"
+*   Action: (Optional second call) Ask: "Do you have a vegan gluten-free option that isn't on the menu?"
+*   Result: The agent should offer to transfer or take a message, which will appear in the "Call Logs".
+
+---
+
+Phase 5: Conclusion
+
+Scene 8: Wrap Up
+*   Action: Return to the "Overview" dashboard.
+*   Talking Point: "In just a few minutes, we updated our entire menu, took a complex voice order, and synced it to our kitchen display system automatically. This is the power of the Restaurant Voice Hub."
+
+---
+
+Preparation Checklist:
+- [ ] Ensure Backend is running (python backend/main.py)
+- [ ] Ensure Frontend is running (npm run dev)
+- [ ] Have sample_menus folder open and accessible.
+- [ ] Test your microphone input.

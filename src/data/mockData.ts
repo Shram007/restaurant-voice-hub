@@ -94,51 +94,6 @@ export const mockCalls = [
   },
 ];
 
-export const mockMenuItems = [
-  {
-    id: "1",
-    name: "Margherita Pizza",
-    category: "Pizza",
-    price: 16.99,
-    available: true,
-  },
-  {
-    id: "2",
-    name: "Pepperoni Pizza",
-    category: "Pizza",
-    price: 18.99,
-    available: true,
-  },
-  {
-    id: "3",
-    name: "Pasta Carbonara",
-    category: "Pasta",
-    price: 14.99,
-    available: true,
-  },
-  {
-    id: "4",
-    name: "Caesar Salad",
-    category: "Salads",
-    price: 11.99,
-    available: true,
-  },
-  {
-    id: "5",
-    name: "Tiramisu",
-    category: "Desserts",
-    price: 8.99,
-    available: false,
-  },
-  {
-    id: "6",
-    name: "Garlic Bread",
-    category: "Sides",
-    price: 5.99,
-    available: true,
-  },
-];
-
 export const mockFaqs = [
   {
     id: "1",
