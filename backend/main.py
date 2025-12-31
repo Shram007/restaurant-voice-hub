@@ -8,7 +8,10 @@ import io
 import csv
 import json
 from dateutil import parser
-from database import supabase
+try:
+    from backend.database import supabase
+except ImportError:
+    from database import supabase
 
 app = FastAPI()
 
