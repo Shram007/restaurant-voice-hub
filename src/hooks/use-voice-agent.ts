@@ -1,5 +1,5 @@
 
-import { useConversation } from '@11labs/react';
+import { useConversation } from '@elevenlabs/react';
 import { useState, useCallback } from 'react';
 
 export const useVoiceAgent = () => {
