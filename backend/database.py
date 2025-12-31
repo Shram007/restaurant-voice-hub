@@ -1,15 +1,11 @@
-from sqlmodel import create_engine, SQLModel, Session
-from models import *
+import os
+from supabase import create_client, Client
 
-sqlite_file_name = "database.db"
-sqlite_url = f"sqlite:///{sqlite_file_name}"
+url: str = os.environ.get("SUPABASE_URL", "")
+key: str = os.environ.get("SUPABASE_KEY", "")
 
-connect_args = {"check_same_thread": False}
-engine = create_engine(sqlite_url, echo=True, connect_args=connect_args)
+# Fallback for local dev if not set (user should set these in env)
+if not url or not key:
+    print("Warning: SUPABASE_URL or SUPABASE_KEY not found in environment variables.")
 
-def create_db_and_tables():
-    SQLModel.metadata.create_all(engine)
-
-def get_session():
-    with Session(engine) as session:
-        yield session
+supabase: Client = create_client(url, key)

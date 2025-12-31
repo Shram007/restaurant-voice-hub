@@ -1,6 +1,5 @@
 fastapi
 uvicorn[standard]
-sqlmodel
 python-multipart
-pandas
 python-dateutil
+supabase

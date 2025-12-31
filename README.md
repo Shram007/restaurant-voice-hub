@@ -2,83 +2,75 @@
 
 This is a full-stack application with a React frontend and a FastAPI (Python) backend, designed to integrate with ElevenLabs for AI voice ordering.
 
-## Prerequisites
+## Cloud Deployment Guide (Vercel + Render + Supabase)
 
+This project is set up to be deployed on the cloud.
+
+### 1. Database (Supabase)
+1.  Create a new project on [Supabase](https://supabase.com/).
+2.  Go to the **SQL Editor** in the Supabase dashboard.
+3.  Copy the contents of `supabase_schema.sql` (in the project root) and run it to create the tables.
+4.  Get your **Project URL** and **API Key** (anon public) from Project Settings > API.
+
+### 2. Backend (Render)
+1.  Create a new Web Service on [Render](https://render.com/).
+2.  Connect your GitHub repository.
+3.  **Build Command**: `pip install -r backend/requirements.txt`
+4.  **Start Command**: `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
+5.  **Environment Variables**:
+    *   `SUPABASE_URL`: Your Supabase Project URL
+    *   `SUPABASE_KEY`: Your Supabase Anon Key
+    *   `PYTHON_VERSION`: `3.9.0` (optional, but recommended)
+6.  Deploy. Once finished, copy your **Render Backend URL** (e.g., `https://my-app.onrender.com`).
+
+### 3. Frontend (Vercel)
+1.  Import your project into [Vercel](https://vercel.com/).
+2.  **Environment Variables**:
+    *   `VITE_API_URL`: Paste your **Render Backend URL** (NOT the ngrok URL).
+3.  Deploy.
+
+### 4. ElevenLabs Configuration
+1.  Update your Agent's tool definitions in ElevenLabs.
+2.  Replace the `ngrok` URL with your new **Render Backend URL**.
+
+---
+
+## Local Development Guide
+
+### Prerequisites
 1.  **Node.js**: [Download & Install](https://nodejs.org/) (for the frontend)
 2.  **Python 3.8+**: [Download & Install](https://www.python.org/) (for the backend)
 3.  **ngrok**: [Download & Install](https://ngrok.com/) (for external access/ElevenLabs)
 
-## Setup & Startup Guide
+### Setup Steps
 
-To run this application on any machine (including a new PC), follow these steps:
-
-### 1. Setup Backend (Python)
-
-Open a terminal/command prompt in the `restaurant-voice-hub` directory:
-
-```bash
-# Install Python dependencies
-pip install fastapi uvicorn requests python-multipart
-
-# Start the Backend Server
-python backend/main.py
-```
-*The backend will start on `http://localhost:8001`.*
-
-### 2. Setup Frontend (React)
-
-Open a **new** terminal in the `restaurant-voice-hub` directory:
-
-```bash
-# Install Node dependencies (first time only)
-npm install
-
-# Start the Frontend
-npm run dev
-```
-*The frontend dashboard will be available at `http://localhost:8081` (or similar).*
-
-### 3. Setup External Access (ngrok)
-
-To allow ElevenLabs (or other external tools) to talk to your local backend, you need a tunnel.
-Open a **third** terminal:
-
-```bash
-# Start ngrok pointing to your backend port
-# Replace the domain with your specific static domain if you have one
-ngrok http --domain=overbig-harrison-unfervidly.ngrok-free.dev 8001
-```
-
-### Using ngrok on a Different PC
-
-If you move this project to another computer, you can continue using the same static domain (`overbig-harrison-unfervidly.ngrok-free.dev`), but you must follow these rules:
-
-1.  **Authenticate**: You must log in to ngrok on the new PC using the **same ngrok account** (or Auth Token) that owns the domain.
+1.  **Setup Backend**:
     ```bash
-    ngrok config add-authtoken <YOUR_AUTH_TOKEN>
+    # Install dependencies
+    pip install -r backend/requirements.txt
+    
+    # Set Supabase Env Vars (Windows PowerShell)
+    $env:SUPABASE_URL="your_url"
+    $env:SUPABASE_KEY="your_key"
+    
+    # Start Server
+    python backend/main.py
     ```
-    *(You can find your token on the [ngrok Dashboard](https://dashboard.ngrok.com/get-started/your-authtoken))*
 
-2.  **Single Session**: You cannot run the tunnel on two computers at the same time with the same domain (on the free plan).
-    *   **Stop ngrok on the old PC** (Ctrl+C in the terminal).
-    *   Start it on the new PC using the command in Step 3 above.
+2.  **Setup Frontend**:
+    ```bash
+    npm install
+    npm run dev
+    ```
+
+3.  **Setup Tunnel**:
+    ```bash
+    ngrok http --domain=overbig-harrison-unfervidly.ngrok-free.dev 8001
+    ```
 
 ## Configuration
-
-### Environment Variables (.env)
 The frontend connects to the backend using the configuration in `.env`.
-For local development (to avoid ISP blocking issues), use:
+For local development:
 ```
 VITE_API_URL=http://localhost:8001
 ```
-
-### ElevenLabs Setup
-When configuring your Agent in ElevenLabs:
-1.  Use the **ngrok URL** (e.g., `https://overbig-harrison-unfervidly.ngrok-free.dev`) for all tool definitions.
-2.  Your local dashboard will continue to work via `localhost`.
-
-## Troubleshooting
-
-*   **Menu Search Failed**: Ensure the backend is running and the ngrok tunnel is active with the correct domain.
-*   **Availability Toggle Issue**: Ensure you are using the latest code where `api.ts` maps `availability` correctly.
-*   **ISP Blocking**: If `curl` to the ngrok URL fails locally, use `localhost` for local testing.
