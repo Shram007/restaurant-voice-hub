@@ -41,6 +41,11 @@ app.add_middleware(
 def health_check():
     return {"ok": True, "time": datetime.now().isoformat()}
 
+@app.get("/")
+def root():
+    return {"message": "Restaurant Voice Hub API is running"}
+
+
 # --- Tools (ElevenLabs) ---
 
 @app.get("/tool/menu_search", response_model=MenuResponse)
