@@ -51,3 +51,37 @@ create table public.faqs (
 create index idx_menu_restaurant on public.menu_items(restaurant_id);
 create index idx_orders_restaurant on public.orders(restaurant_id);
 create index idx_orders_status on public.orders(status);
+
+-- --- SECURITY & RLS ---
+
+-- 1. Enable RLS on all tables
+alter table public.menu_items enable row level security;
+alter table public.orders enable row level security;
+alter table public.call_logs enable row level security;
+alter table public.faqs enable row level security;
+
+-- 2. Create Policies
+
+-- Menu Items: Public Read, Service Write
+create policy "Allow public read access to menu"
+on public.menu_items for select
+to anon, authenticated
+using (true);
+
+-- FAQs: Public Read, Service Write
+create policy "Allow public read access to faqs"
+on public.faqs for select
+to anon, authenticated
+using (true);
+
+-- Note: We do NOT add public insert/update/delete policies.
+-- This implicitly denies anonymous writes.
+-- The Supabase "service_role" key bypasses RLS, so your backend API
+-- will still be able to do everything it needs to do.
+
+-- Orders: Service Role Only (or authenticated user specific if you add auth later)
+-- For now, since orders are created via your backend API which uses the service key,
+-- we technically don't need policies for 'anon' to read/write orders directly.
+-- If you want the frontend to read orders, you might need a policy like:
+-- create policy "Allow public read to orders" on public.orders for select using (true);
+-- But usually, order history is private.
