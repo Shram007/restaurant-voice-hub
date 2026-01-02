@@ -264,11 +264,13 @@ async def upload_menu(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/orders")
-def get_orders_dashboard(restaurant_id: str = DEFAULT_RESTAURANT_ID):
+def get_orders_dashboard(restaurant_id: str = DEFAULT_RESTAURANT_ID, range: str = Query("today")):
+    # Note: 'range' parameter is currently ignored by get_orders, but frontend sends it.
+    # Future improvement: Pass range to get_orders to filter by date.
     return get_orders(restaurant_id)
 
 @app.get("/calls")
-def get_calls_dashboard(restaurant_id: str = DEFAULT_RESTAURANT_ID):
+def get_calls_dashboard(restaurant_id: str = DEFAULT_RESTAURANT_ID, range: str = Query("today")):
     return get_call_logs(restaurant_id)
 
 @app.get("/faqs")
