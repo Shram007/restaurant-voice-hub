@@ -27,7 +27,7 @@ except ImportError:
 app = FastAPI()
 
 # Configuration
-DEFAULT_RESTAURANT_ID = "rest_123"
+DEFAULT_RESTAURANT_ID = "demo_restaurant"
 
 app.add_middleware(
     CORSMiddleware,
@@ -81,6 +81,7 @@ def order_create_or_update(req: OrderCreateRequest):
     
     for item in req.items:
         if item.item_id not in menu_map:
+            print(f"Validation Error: Item {item.item_id} not found. Available IDs: {list(menu_map.keys())}")
             validation_errors.append(f"Item {item.item_id} not found")
             continue
             
