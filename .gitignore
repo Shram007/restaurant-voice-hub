@@ -1,8 +1,9 @@
 # Backend
-backend/venv/
-backend/__pycache__/
-backend/*.db
-backend/.pytest_cache/
+venv/
+__pycache__/
+*.pyc
+*.db
+.pytest_cache/
 .env
 .env.local
 
