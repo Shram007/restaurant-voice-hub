@@ -25,9 +25,11 @@ This project is set up to be deployed on the cloud.
 
 ### 3. Frontend (Vercel)
 1.  Import your project into [Vercel](https://vercel.com/).
-2.  **Environment Variables**:
+2.  **Project Settings**:
+    *   **Root Directory**: Set to `frontend`.
+3.  **Environment Variables**:
     *   `VITE_API_URL`: Paste your **Render Backend URL** (NOT the ngrok URL).
-3.  Deploy.
+4.  Deploy.
 
 ### 4. ElevenLabs Configuration
 1.  Update your Agent's tool definitions in ElevenLabs.
@@ -53,12 +55,13 @@ This project is set up to be deployed on the cloud.
     $env:SUPABASE_URL="your_url"
     $env:SUPABASE_KEY="your_key"
     
-    # Start Server
+    # Start Server (from root directory)
     python backend/main.py
     ```
 
 2.  **Setup Frontend**:
     ```bash
+    cd frontend
     npm install
     npm run dev
     ```
@@ -70,7 +73,7 @@ This project is set up to be deployed on the cloud.
 
 ## Configuration
 The frontend connects to the backend using the configuration in `.env`.
-For local development:
+For local development, create a `.env` file in the `frontend/` directory:
 ```
 VITE_API_URL=http://localhost:8001
 ```
