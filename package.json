@@ -1,0 +1,8 @@
+{
+  "name": "restaurant-voice-hub-root",
+  "private": true,
+  "scripts": {
+    "postinstall": "cd frontend && npm install",
+    "build": "cd frontend && npm run build && mkdir -p ../dist && cp -r dist/* ../dist/"
+  }
+}
