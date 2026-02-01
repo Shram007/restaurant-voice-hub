@@ -27,8 +27,10 @@ This project is set up to be deployed on the cloud.
 1.  Import your project into [Vercel](https://vercel.com/).
 2.  **Project Settings**:
     *   **Root Directory**: Set to `frontend`.
+    *   **Framework Preset**: Vite
 3.  **Environment Variables**:
-    *   `VITE_API_URL`: Paste your **Render Backend URL** (NOT the ngrok URL).
+    *   `VITE_API_URL`: Paste your **Render Backend URL** (e.g., `https://restaurant-voice-hub.onrender.com`).
+    *   *Important: Do NOT use the ngrok URL or localhost.*
 4.  Deploy.
 
 ### 4. ElevenLabs Configuration
