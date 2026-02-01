@@ -1,7 +1,7 @@
 from datetime import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.routers import tools, dashboard
+from backend.routers import tools, dashboard, pos
 
 app = FastAPI(title="Restaurant Voice Hub API")
 
@@ -17,6 +17,7 @@ app.add_middleware(
 # Include Routers
 app.include_router(tools.router)
 app.include_router(dashboard.router)
+app.include_router(pos.router, prefix="/pos")
 
 @app.get("/health")
 def health_check():

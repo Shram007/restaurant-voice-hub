@@ -12,7 +12,7 @@ export const api = {
     return data.map((order: any) => ({
       ...order,
       id: order.order_id,
-      items: Array.isArray(order.items) 
+      items: Array.isArray(order.items)
         ? order.items.map((i: any) => `${i.quantity}x ${i.name || i.item_id}`).join(", ")
         : order.items,
       eta: order.status === "confirmed" ? "30 min" : "N/A"
@@ -46,9 +46,9 @@ export const api = {
     const data = await response.json();
     // Map backend item_id to frontend id
     return data.map((item: any) => ({
-        ...item,
-        id: item.item_id,
-        available: item.availability // Map backend field to frontend expectation
+      ...item,
+      id: item.item_id,
+      available: item.availability // Map backend field to frontend expectation
     }));
   },
   getFaqs: async () => {
@@ -92,6 +92,27 @@ export const api = {
       body: JSON.stringify({ available }),
     });
     if (!response.ok) throw new Error("Failed to update availability");
+    return response.json();
+  },
+  connectPOS: async (provider: string, apiKey: string) => {
+    const response = await fetch(`${API_URL}/pos/connect`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true"
+      },
+      body: JSON.stringify({ provider, api_key: apiKey }),
+    });
+    if (!response.ok) throw new Error("Failed to connect POS");
+    return response.json();
+  },
+  getPOSStatus: async () => {
+    const response = await fetch(`${API_URL}/pos/status`, {
+      headers: {
+        "ngrok-skip-browser-warning": "true"
+      }
+    });
+    if (!response.ok) throw new Error("Failed to fetch POS status");
     return response.json();
   },
 };

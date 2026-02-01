@@ -82,3 +82,14 @@ class HandoffResponse(BaseModel):
 
 class AvailabilityUpdate(BaseModel):
     available: bool
+
+class POSConfig(BaseModel):
+    id: Optional[int] = None
+    provider: str  # shift4, square, clover
+    api_key: str
+    is_connected: bool = False
+    connected_at: Optional[str] = None  # Use string for ISO format or datetime
+
+class POSConnectRequest(BaseModel):
+    provider: str
+    api_key: str

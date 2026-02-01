@@ -163,8 +163,29 @@ const Setup = () => {
                     Enter your {posProviders.find(p => p.id === selectedPOS)?.name} API Key
                   </Label>
                   <div className="flex gap-2">
-                    <Input type="password" placeholder="sk_test_..." className="font-mono bg-background" />
-                    <Button onClick={() => toast({ title: "Connected", description: `Successfully connected to ${posProviders.find(p => p.id === selectedPOS)?.name}` })}>
+                    <Input
+                      id="pos-api-key"
+                      type="password"
+                      placeholder="sk_test_..."
+                      className="font-mono bg-background"
+                    />
+                    <Button onClick={async () => {
+                      const apiKey = (document.getElementById('pos-api-key') as HTMLInputElement)?.value;
+                      if (!apiKey) {
+                        toast({ title: "Error", description: "Please enter an API key", variant: "destructive" });
+                        return;
+                      }
+                      try {
+                        const result = await api.connectPOS(selectedPOS!, apiKey);
+                        if (result.success) {
+                          toast({ title: "Connected", description: result.message });
+                        } else {
+                          toast({ title: "Connection Failed", description: result.message, variant: "destructive" });
+                        }
+                      } catch (error) {
+                        toast({ title: "Error", description: "Failed to connect to POS service", variant: "destructive" });
+                      }
+                    }}>
                       Connect
                     </Button>
                   </div>
