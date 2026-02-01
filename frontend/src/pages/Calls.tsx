@@ -167,7 +167,9 @@ const Calls = () => {
                       </td>
                       <td className="px-5 py-4 text-right">
                         <span className="text-sm text-muted-foreground">
-                          {format(new Date(call.timestamp), "h:mm a")}
+                          {call.timestamp && !isNaN(new Date(call.timestamp).getTime()) 
+                            ? format(new Date(call.timestamp), "h:mm a") 
+                            : "—"}
                         </span>
                       </td>
                     </tr>
