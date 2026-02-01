@@ -157,7 +157,7 @@ const Calls = () => {
                           )}
                           {call.outcome === "transferred"
                             ? "Transferred"
-                            : call.outcome.toUpperCase()}
+                            : (call.outcome || "").toUpperCase()}
                         </span>
                       </td>
                       <td className="px-5 py-4 hidden md:table-cell">
