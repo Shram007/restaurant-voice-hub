@@ -41,10 +41,10 @@ const Orders = () => {
     fetchData();
   }, [filter]);
 
-  const filteredOrders = orders.filter(
+  const filteredOrders = (orders || []).filter(
     (order) =>
-      order.customer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.id.toLowerCase().includes(searchQuery.toLowerCase())
+      (order.customer_name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+      (order.id?.toLowerCase() || "").includes(searchQuery.toLowerCase())
   );
 
   return (
