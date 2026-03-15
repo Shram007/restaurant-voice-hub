@@ -8,6 +8,7 @@ import { Check, ArrowRight, ArrowLeft, Upload, Link as LinkIcon } from "lucide-r
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { api } from "@/services/api";
+import { useRestaurant } from "@/restaurant-context";
 
 const posProviders = [
   { id: "square", name: "Square", logo: "⬛" },
@@ -24,6 +25,7 @@ const Setup = () => {
     enableFallback: true,
   });
   const { toast } = useToast();
+  const { selectedRestaurantId } = useRestaurant();
 
   const steps = [
     { number: 1, title: "Connect POS" },
@@ -55,7 +57,7 @@ const Setup = () => {
     if (!file) return;
 
     try {
-      await api.uploadMenu(file);
+      await api.uploadMenu(file, selectedRestaurantId);
       toast({
         title: "Success",
         description: "Menu uploaded successfully",

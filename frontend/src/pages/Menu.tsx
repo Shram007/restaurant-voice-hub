@@ -8,23 +8,31 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/services/api";
 import { Plus, Save, Trash2, Upload, Pencil } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useRestaurant } from "@/restaurant-context";
 
 const Menu = () => {
   const [menuItems, setMenuItems] = useState<any[]>([]);
   const [faqs, setFaqs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [savingFaqs, setSavingFaqs] = useState(false);
+  const [uploadRestaurantId, setUploadRestaurantId] = useState("");
   const { toast } = useToast();
+  const { selectedRestaurantId } = useRestaurant();
+
+  useEffect(() => {
+    setUploadRestaurantId(selectedRestaurantId);
+  }, [selectedRestaurantId]);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [selectedRestaurantId]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
       const [menuData, faqsData] = await Promise.all([
-        api.getMenu(),
-        api.getFaqs()
+        api.getMenu(selectedRestaurantId),
+        api.getFaqs(selectedRestaurantId)
       ]);
       setMenuItems(menuData);
       setFaqs(faqsData);
@@ -39,8 +47,10 @@ const Menu = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    const targetRestaurantId = (uploadRestaurantId || "").trim() || selectedRestaurantId;
+
     try {
-      const response = await api.uploadMenu(file);
+      const response = await api.uploadMenu(file, targetRestaurantId);
       toast({
         title: "Success",
         description: response.message || "Menu uploaded successfully",
@@ -61,9 +71,9 @@ const Menu = () => {
   const toggleAvailability = async (id: string) => {
     const item = menuItems.find(i => i.id === id);
     if (!item) return;
-    
+
     const newStatus = !item.available;
-    
+
     // Optimistic update
     setMenuItems((items) =>
       items.map((item) =>
@@ -93,11 +103,31 @@ const Menu = () => {
     }
   };
 
-  const handleSave = () => {
-    toast({
-      title: "Changes saved",
-      description: "Your menu and FAQs have been updated successfully.",
-    });
+  const updateFaqField = (faqId: string, field: "question" | "answer", value: string) => {
+    setFaqs((prev) =>
+      prev.map((faq) => (faq.id === faqId ? { ...faq, [field]: value } : faq))
+    );
+  };
+
+  const handleSave = async () => {
+    try {
+      setSavingFaqs(true);
+      await api.saveFaqs(faqs, selectedRestaurantId);
+      toast({
+        title: "Changes saved",
+        description: "Your FAQs have been updated successfully.",
+      });
+      await fetchData();
+    } catch (error) {
+      console.error("Error saving FAQs:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save FAQs.",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingFaqs(false);
+    }
   };
 
   return (
@@ -134,6 +164,14 @@ const Menu = () => {
                   Drag and drop or click to browse
                 </p>
               </div>
+              <div className="w-full max-w-sm text-left">
+                <p className="text-xs text-muted-foreground mb-1">Restaurant ID for upload</p>
+                <Input
+                  value={uploadRestaurantId}
+                  onChange={(e) => setUploadRestaurantId(e.target.value)}
+                  placeholder="Enter restaurant_id"
+                />
+              </div>
               <div className="relative">
                 <Input
                   type="file"
@@ -141,7 +179,7 @@ const Menu = () => {
                   onChange={handleFileUpload}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" disabled={loading}>
                   Choose File
                 </Button>
               </div>
@@ -179,7 +217,13 @@ const Menu = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {menuItems.map((item) => (
+                  {loading ? (
+                    <tr>
+                      <td colSpan={5} className="text-center py-10 text-muted-foreground">
+                        Loading menu...
+                      </td>
+                    </tr>
+                  ) : menuItems.map((item) => (
                     <tr
                       key={item.id}
                       className="hover:bg-muted/30 transition-colors"
@@ -217,6 +261,13 @@ const Menu = () => {
                       </td>
                     </tr>
                   ))}
+                  {!loading && menuItems.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="text-center py-10 text-muted-foreground">
+                        No menu items found for this restaurant.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -240,12 +291,14 @@ const Menu = () => {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 space-y-3">
                       <Input
-                        defaultValue={faq.question}
+                        value={faq.question || ""}
+                        onChange={(e) => updateFaqField(faq.id, "question", e.target.value)}
                         className="font-medium"
                         placeholder="Question"
                       />
                       <Textarea
-                        defaultValue={faq.answer}
+                        value={faq.answer || ""}
+                        onChange={(e) => updateFaqField(faq.id, "answer", e.target.value)}
                         placeholder="Answer"
                         rows={2}
                       />
@@ -260,13 +313,18 @@ const Menu = () => {
                   </div>
                 </div>
               ))}
+              {!loading && faqs.length === 0 && (
+                <div className="p-8 text-center text-sm text-muted-foreground">
+                  No FAQs found for this restaurant.
+                </div>
+              )}
             </div>
           </div>
 
           <div className="flex justify-end">
-            <Button onClick={handleSave}>
+            <Button onClick={handleSave} disabled={savingFaqs || loading}>
               <Save className="w-4 h-4" />
-              Save Changes
+              {savingFaqs ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </TabsContent>

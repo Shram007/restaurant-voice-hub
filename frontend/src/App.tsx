@@ -10,26 +10,29 @@ import Menu from "./pages/Menu";
 import Setup from "./pages/Setup";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import { RestaurantProvider } from "./restaurant-context";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/calls" element={<Calls />} />
-          <Route path="/menu" element={<Menu />} />
-          <Route path="/setup" element={<Setup />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <RestaurantProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/calls" element={<Calls />} />
+            <Route path="/menu" element={<Menu />} />
+            <Route path="/setup" element={<Setup />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </RestaurantProvider>
   </QueryClientProvider>
 );
 

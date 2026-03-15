@@ -4,31 +4,61 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/services/api";
+import { useRestaurant } from "@/restaurant-context";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as DatePicker } from "@/components/ui/calendar";
 import {
   ShoppingBag,
   DollarSign,
   TrendingUp,
   Search,
   Calendar,
-  Filter,
 } from "lucide-react";
+import { format } from "date-fns";
+import type { DateRange } from "react-day-picker";
 
 type FilterType = "today" | "week" | "month" | "year" | "custom";
 
 const Orders = () => {
   const [filter, setFilter] = useState<FilterType>("today");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [customRange, setCustomRange] = useState<DateRange | undefined>();
   const [searchQuery, setSearchQuery] = useState("");
   const [orders, setOrders] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { selectedRestaurantId } = useRestaurant();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
+
+        const customStart =
+          filter === "custom" && customRange?.from
+            ? customRange.from.toISOString()
+            : undefined;
+        const customEnd =
+          filter === "custom" && customRange?.to
+            ? customRange.to.toISOString()
+            : undefined;
+
         const [ordersData, statsData] = await Promise.all([
-          api.getOrders(filter),
-          api.getStats()
+          api.getOrders(
+            filter,
+            selectedRestaurantId,
+            statusFilter,
+            customStart,
+            customEnd
+          ),
+          api.getStats(selectedRestaurantId)
         ]);
         setOrders(ordersData);
         setStats(statsData);
@@ -39,13 +69,18 @@ const Orders = () => {
       }
     };
     fetchData();
-  }, [filter]);
+  }, [filter, statusFilter, customRange?.from, customRange?.to, selectedRestaurantId]);
 
   const filteredOrders = (orders || []).filter(
     (order) =>
       (order.customer_name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
       (order.id?.toLowerCase() || "").includes(searchQuery.toLowerCase())
   );
+
+  const customFilterLabel =
+    customRange?.from && customRange?.to
+      ? `${format(customRange.from, "MMM d")} - ${format(customRange.to, "MMM d")}`
+      : "Custom";
 
   return (
     <DashboardLayout
@@ -91,7 +126,22 @@ const Orders = () => {
               className="pl-10"
             />
           </div>
-          <div className="flex gap-2">
+
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="Order status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="confirmed">Confirmed</SelectItem>
+              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="in_progress">In Progress</SelectItem>
+              <SelectItem value="ready">Ready</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <div className="flex gap-2 flex-wrap">
             {(["today", "week", "month", "year"] as FilterType[]).map((f) => (
               <Button
                 key={f}
@@ -102,10 +152,30 @@ const Orders = () => {
                 {f === "today" ? "Today" : f === "week" ? "This Week" : f === "month" ? "This Month" : "This Year"}
               </Button>
             ))}
-            <Button variant="outline" size="sm">
-              <Calendar className="w-4 h-4" />
-              Custom
-            </Button>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={filter === "custom" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setFilter("custom")}
+                >
+                  <Calendar className="w-4 h-4" />
+                  {customFilterLabel}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <DatePicker
+                  mode="range"
+                  selected={customRange}
+                  onSelect={(range) => {
+                    setCustomRange(range);
+                    setFilter("custom");
+                  }}
+                  numberOfMonths={2}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 
@@ -179,7 +249,7 @@ const Orders = () => {
                       </td>
                       <td className="px-5 py-4 text-right">
                         <span className="font-semibold text-foreground">
-                          ${order.total.toFixed(2)}
+                          ${Number(order.total || 0).toFixed(2)}
                         </span>
                       </td>
                       <td className="px-5 py-4 text-center">
@@ -194,8 +264,8 @@ const Orders = () => {
                         >
                           {order.status === "in_progress"
                             ? "In Progress"
-                            : order.status.charAt(0).toUpperCase() +
-                              order.status.slice(1)}
+                            : (order.status || "").charAt(0).toUpperCase() +
+                              (order.status || "").slice(1)}
                         </span>
                       </td>
                       <td className="px-5 py-4 text-right">

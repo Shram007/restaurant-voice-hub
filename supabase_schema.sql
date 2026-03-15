@@ -33,6 +33,7 @@ create table public.orders (
 -- Call Logs Table
 create table public.call_logs (
     id uuid default uuid_generate_v4() primary key,
+    restaurant_id text not null,
     type text not null, -- e.g., 'handoff'
     data jsonb default '{}'::jsonb,
     created_at timestamp with time zone default timezone('utc'::text, now())
@@ -51,6 +52,7 @@ create table public.faqs (
 create index idx_menu_restaurant on public.menu_items(restaurant_id);
 create index idx_orders_restaurant on public.orders(restaurant_id);
 create index idx_orders_status on public.orders(status);
+create index idx_calls_restaurant on public.call_logs(restaurant_id);
 
 -- --- SECURITY & RLS ---
 

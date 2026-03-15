@@ -16,11 +16,13 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useVoiceAgent } from "@/hooks/use-voice-agent";
+import { useRestaurant } from "@/restaurant-context";
 
 const Index = () => {
   const [stats, setStats] = useState<any>(null);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { selectedRestaurantId } = useRestaurant();
   
   const { status, isSpeaking, startConversation, stopConversation } = useVoiceAgent();
   const isConnected = status === "connected";
@@ -30,8 +32,8 @@ const Index = () => {
       try {
         setLoading(true);
         const [statsData, ordersData] = await Promise.all([
-          api.getStats(),
-          api.getOrders("today")
+          api.getStats(selectedRestaurantId),
+          api.getOrders("today", selectedRestaurantId)
         ]);
         setStats(statsData);
         setRecentOrders(ordersData.slice(0, 3));
@@ -42,7 +44,7 @@ const Index = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [selectedRestaurantId]);
 
   return (
     <DashboardLayout

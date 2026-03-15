@@ -153,6 +153,7 @@ class OrderService:
     def handoff_to_human(req: HandoffRequest) -> HandoffResponse:
         try:
             supabase.table("call_logs").insert({
+                "restaurant_id": req.restaurant_id,
                 "type": "handoff",
                 "data": req.dict()
             }).execute()
@@ -165,11 +166,59 @@ class OrderService:
         )
 
     @staticmethod
-    def get_orders(restaurant_id: Optional[str] = None):
+    def _resolve_time_window(
+        time_range: str = "today",
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+    ):
+        now = datetime.utcnow()
+
+        def _parse_iso(value: Optional[str]) -> Optional[datetime]:
+            if not value:
+                return None
+            try:
+                parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+                return parsed.replace(tzinfo=None) if parsed.tzinfo else parsed
+            except Exception:
+                return None
+
+        if time_range == "custom":
+            start = _parse_iso(start_date)
+            end = _parse_iso(end_date) or now
+            if start:
+                return start.isoformat(), end.isoformat()
+
+        if time_range == "week":
+            return (now - timedelta(days=7)).isoformat(), now.isoformat()
+        if time_range == "month":
+            return (now - timedelta(days=30)).isoformat(), now.isoformat()
+        if time_range == "year":
+            return (now - timedelta(days=365)).isoformat(), now.isoformat()
+
+        # Default: today
+        start_of_day = datetime(now.year, now.month, now.day)
+        return start_of_day.isoformat(), now.isoformat()
+
+    @staticmethod
+    def get_orders(
+        restaurant_id: Optional[str] = None,
+        time_range: str = "today",
+        status: Optional[str] = None,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+    ):
         try:
             query = supabase.table("orders").select("*").order("created_at", desc=True)
+
             if restaurant_id:
                 query = query.eq("restaurant_id", restaurant_id)
+
+            start_iso, end_iso = OrderService._resolve_time_window(time_range, start_date, end_date)
+            query = query.gte("created_at", start_iso).lte("created_at", end_iso)
+
+            if status and status.lower() != "all":
+                query = query.eq("status", status)
+
             return query.execute().data
         except:
             return []

@@ -82,3 +82,8 @@ class HandoffResponse(BaseModel):
 
 class AvailabilityUpdate(BaseModel):
     available: bool
+
+class FAQItem(BaseModel):
+    id: Optional[str] = None
+    question: str
+    answer: str

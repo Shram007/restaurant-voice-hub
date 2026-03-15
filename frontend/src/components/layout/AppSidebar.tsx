@@ -12,6 +12,15 @@ import {
   Mic,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useRestaurant } from "@/restaurant-context";
+import { restaurants } from "@/data/restaurants";
 
 const navItems = [
   { title: "Overview", icon: LayoutDashboard, path: "/" },
@@ -25,6 +34,7 @@ const navItems = [
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const { selectedRestaurantId, setSelectedRestaurantId } = useRestaurant();
 
   return (
     <aside
@@ -45,6 +55,24 @@ export function AppSidebar() {
           </div>
         )}
       </div>
+
+      {!collapsed && (
+        <div className="px-3 pt-3">
+          <p className="text-xs text-muted-foreground px-1 pb-2">Restaurant</p>
+          <Select value={selectedRestaurantId} onValueChange={setSelectedRestaurantId}>
+            <SelectTrigger className="h-9">
+              <SelectValue placeholder="Select restaurant" />
+            </SelectTrigger>
+            <SelectContent>
+              {restaurants.map((restaurant) => (
+                <SelectItem key={restaurant.id} value={restaurant.id}>
+                  {restaurant.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
