@@ -182,6 +182,8 @@ def dispatch_tool(name: str, arguments: dict) -> str:
 
     elif name == "get_eta":
         req = EtaRequest(**arguments)
+        # OrderService.get_eta computes ETA from kitchen load; order_id is
+        # validated by EtaRequest but the underlying service only needs restaurant_id.
         result = OrderService.get_eta(req.restaurant_id)
         return json.dumps(result.dict() if hasattr(result, "dict") else result)
 
