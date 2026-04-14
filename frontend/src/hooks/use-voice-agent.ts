@@ -1,6 +1,7 @@
 
 import { useConversation } from '@elevenlabs/react';
 import { useState, useCallback } from 'react';
+import { log } from '@/lib/logger';
 
 export const useVoiceAgent = () => {
   const conversation = useConversation();
@@ -19,13 +20,13 @@ export const useVoiceAgent = () => {
     }
 
     try {
-      console.log('[useVoiceAgent] Starting conversation with Agent ID:', agentId);
+      log.info('voice_agent_start', { agentId });
       await conversation.startSession({
         agentId: agentId,
         connectionType: 'websocket', // Optional, defaults to websocket if not specified
       });
     } catch (error) {
-      console.error('Failed to start conversation:', error);
+      log.error('voice_agent_start_failed', { error: String(error) });
       throw error;
     }
   }, [agentId, conversation]);
