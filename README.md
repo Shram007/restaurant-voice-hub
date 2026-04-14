@@ -89,3 +89,33 @@ For local development, create a `.env` file in the `frontend/` directory:
 ```env
 VITE_API_URL=http://localhost:8001
 ```
+
+---
+
+## MCP Server
+
+`backend/mcp_server.py` exposes all five tool endpoints as [Model Context Protocol](https://modelcontextprotocol.io/) callable tools over stdio JSON-RPC 2.0.
+
+### Tools exposed
+
+| Tool | Description |
+|------|-------------|
+| `menu_search` | Search the live menu by keyword |
+| `order_create_or_update` | Create or update a pending order |
+| `get_eta` | Get order preparation ETA |
+| `order_confirm` | Confirm a pending order |
+| `handoff_to_human` | Escalate to a human agent |
+
+### Run the MCP server
+
+```bash
+python backend/mcp_server.py
+```
+
+The server reads JSON-RPC requests from `stdin` and writes responses to `stdout` — compatible with any MCP host (Claude Desktop, Cursor, etc.).
+
+### Smoke test
+
+```bash
+python backend/mcp_server_test.py
+```
